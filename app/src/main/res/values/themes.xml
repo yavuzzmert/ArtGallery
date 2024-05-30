@@ -1,0 +1,11 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.18ArtBook" parent="Theme.Material3.Light">
+        <!-- Customize your light theme here. -->
+         <item name="colorPrimary">@color/cardview_dark_background</item>
+    </style>
+
+
+
+    <style name="Theme.18ArtBook" parent="Base.Theme.18ArtBook" />
+</resources>
