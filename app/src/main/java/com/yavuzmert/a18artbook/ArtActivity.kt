@@ -17,6 +17,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
 import com.yavuzmert.a18artbook.databinding.ActivityArtBinding
+import java.io.ByteArrayOutputStream
 import java.lang.Exception
 
 class ArtActivity : AppCompatActivity() {
@@ -37,6 +38,64 @@ class ArtActivity : AppCompatActivity() {
 
     fun saveButtonClicked(view: View){
 
+        val artName = binding.artNameText.text.toString()
+        val artistName = binding.artistNameText.text.toString()
+        val year = binding.yearText.text.toString()
+
+        if(selectedBitmap != null){
+            val smallBitmap = makeSmallerBitmap(selectedBitmap!!, 300)
+
+            // fotoğrafı byte haline çevirdik 1 ve sıfırlara
+            val outputStream = ByteArrayOutputStream()
+            smallBitmap.compress(Bitmap.CompressFormat.PNG, 50, outputStream)
+            val byteArray = outputStream.toByteArray()
+
+            //SQLite'a kaydediyoruz artık ve veritabanı işlemlerini try catch içinde yapıyoruz
+            try {
+                val database = this.openOrCreateDatabase("Arts", MODE_PRIVATE, null)
+                database.execSQL("CREATE TABLE IF NOT EXISTS arts(id INTEGER PRIMARY KEY, artname VARCHAR, artistname VARCHAR, year VARCHAR, image BLOB)")
+
+                val sqlString = "INSERT INTO arts(artname, artistname, year, image) VALUES (?,?,?,?)"
+                val statement = database.compileStatement(sqlString)
+                statement.bindString(1, artName)
+                statement.bindString(2, artistName)
+                statement.bindString(3, year)
+                statement.bindBlob(4, byteArray)
+                statement.execute()
+
+            }catch (e: Exception){
+                e.printStackTrace()
+            }
+
+            val intent = Intent(this@ArtActivity, MainActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            startActivity(intent)
+            //finish()
+        }
+    }
+    
+    //bitmap'i küçültecek fun yazacağız 1 MB den küçük olmalı  yoksa app hata verebilir
+    // ve max size alarak küçültme işlemi yaptık
+    private fun makeSmallerBitmap(image: Bitmap, maximumSize: Int): Bitmap{
+        var width = image.width
+        var height = image.height
+        
+        val bitmapRatio : Double = width.toDouble() / height.toDouble()
+        
+        if(bitmapRatio > 1){
+            //landscape
+            width = maximumSize
+            val scaledHeight = width / bitmapRatio
+            height = scaledHeight.toInt()
+
+        } else {
+            //portrait
+            height = maximumSize
+            val scaledWidth = height * bitmapRatio
+            width = scaledWidth.toInt()
+        }
+
+        return Bitmap.createScaledBitmap(image, width, height, true)
     }
 
     fun selectImage(view: View){
@@ -132,5 +191,7 @@ class ArtActivity : AppCompatActivity() {
             note; activityResultLauncher -> galeriye gitmek için
                     permissionLauncher -> dosya seçmek için
                     ve bunları initialize etmek için ayrı bir fun oluşturacağız ve OnCreate altında çağıracağız adı registerLauncher olacak.
+
+    - note; bir act. diğerine giderken ya intent ya da finish ya da intent yapıp ek olarak intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)  yani bundan önce ne kadar act varsa kapat ile bitirebiliriz.
 
  */
