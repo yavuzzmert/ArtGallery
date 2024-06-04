@@ -20,6 +20,7 @@ class MainActivity : AppCompatActivity() {
         val view = binding.root
         setContentView(view)
 
+        // artList'i initialize etmemiz lazım
         artList = ArrayList<Art>()
 
         artAdapter = ArtAdapter(artList)
@@ -42,6 +43,7 @@ class MainActivity : AppCompatActivity() {
                 artList.add(art)
             }
 
+            //veri setimizi yenile diye ArtAdapter'e gönderiyoruz
             artAdapter.notifyDataSetChanged()
 
             cursor.close()
@@ -60,6 +62,7 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if(item.itemId == R.id.add_art_item){
             val intent = Intent(this@MainActivity, ArtActivity:: class.java)
+            intent.putExtra("info","new")
             startActivity(intent)
         }
         return super.onOptionsItemSelected(item)
@@ -71,4 +74,5 @@ class MainActivity : AppCompatActivity() {
     - note; ne zaman xml ile kodu birbirine bağlasak inflater çağıracağız
     - options menüsü için, art_menu layout xml ekledik
     - MainActivity içerisinde bunu options menü görünümünü xml ile bağlamak için options menüsünün iki metodunu kullandık ve inflate ettik daha sonra kontrol ederek tıklanınca ne yapacağını belirttik
+    - Verileri recyclerView ile göstermek için adapter oluşturmamız lazım
  */
